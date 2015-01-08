@@ -1,0 +1,140 @@
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<style>
+
+.chart rect {
+ 
+}
+
+.chart text {
+  fill: black;
+  font: 10px sans-serif;
+  text-anchor: end;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+</style>
+
+
+<body>
+	<p>Average Load Monitoring Web Application</p>
+	<svg class='chart'></svg>
+	<br>
+	<table border="1" style="width:50%">
+		<tr>
+			<th>Time</th>
+			<th>News</th>
+		</tr>
+		<tr>
+	    	<td>01:04</td>
+	    	<td>
+	    	{{ r }}
+	    	</td>
+		</tr>
+	</table>
+</body>
+
+<script>
+
+	var data = [
+	    {"x":0,"y":1.50,"color":"#FDAE6B"},
+	    {"x":1,"y":1.20,"color":"#FDD0A2"},
+	    {"x":2,"y":1.30,"color":"#FDD0A2"},
+	    {"x":3,"y":1.90,"color":"#FDD0A2"},
+	    {"x":4,"y":1.70,"color":"#FDD0A2"},
+	    {"x":5,"y":1.90,"color":"#FDD0A2"},	    
+	    {"x":6,"y":0.50,"color":"#FDD0A2"},
+	    {"x":7,"y":1.90,"color":"#FDD0A2"},
+	    {"x":8,"y":1.10,"color":"#FDD0A2"},
+	    {"x":9,"y":1.70,"color":"#FDD0A2"},
+	    {"x":10,"y":1.90,"color":"#FDD0A2"},
+	    {"x":11,"y":1.05,"color":"#FDD0A2"},
+	    {"x":12,"y":1.90,"color":"#FDD0A2"},
+	    {"x":13,"y":1.10,"color":"#FDD0A2"},
+	    {"x":14,"y":1.70,"color":"#FDD0A2"},
+	    {"x":15,"y":2.20,"color":"#FDD0A2"},	    
+	    {"x":16,"y":1.90,"color":"#FDD0A2"},
+	    {"x":17,"y":1.05,"color":"#FDD0A2"},
+	    {"x":18,"y":1.90,"color":"#FDD0A2"},
+	    {"x":19,"y":0.50,"color":"#FDD0A2"},
+	    {"x":20,"y":1.90,"color":"#FDD0A2"},
+	    {"x":21,"y":1.10,"color":"#FDD0A2"},
+	    {"x":22,"y":1.70,"color":"#FDD0A2"},
+	    {"x":23,"y":1.90,"color":"#FDD0A2"},
+	    {"x":24,"y":1.05,"color":"#FDD0A2"},
+	    {"x":25,"y":1.90,"color":"#FDD0A2"},
+	    {"x":26,"y":1.10,"color":"#FDD0A2"},
+	    {"x":27,"y":1.70,"color":"#FDD0A2"},
+	    {"x":28,"y":2.20,"color":"#FDD0A2"},	    
+	    {"x":29,"y":1.90,"color":"#FDD0A2"},
+	    {"x":30,"y":1.05,"color":"#FDD0A2"},
+	    {"x":31,"y":1.90,"color":"#FDD0A2"},
+	];
+
+	var height = 200,
+		width = 400,
+		margin = {top: 20, right: 30, bottom: 30, left: 40};
+
+	var barWidth = width / data.length;
+
+	var col = d3.scale.linear()
+    	.domain([0, 200])
+    	.range([height, 0]);
+
+    var x = d3.scale.linear()
+    	.domain([0, data.length-1])
+    	.range([0, width-barWidth])
+
+    var y = d3.scale.linear()
+    	.domain([0, d3.max(data, function(d) { return d.y; })])
+    	.range([height, 0]);
+
+	var xAxis = d3.svg.axis()
+    	.scale(x)
+    	.orient("bottom");
+
+    var yAxis = d3.svg.axis()
+    	.scale(y)
+    	.orient("left");
+
+	var chart = d3.select(".chart")
+        .attr("width", width+margin.left+margin.right)
+        .attr("height", height+margin.top+margin.bottom);
+
+    chart.append("g")
+    	.attr("class", "y axis")
+    	.attr("transform", "translate("+margin.left+",0)")
+    	.call(yAxis)
+	   .append("text")
+	    .attr("transform", "rotate(-90)")
+	    .attr("y", -36)
+	    .attr("dy", ".71em")
+	    .style("text-anchor", "end")
+	    .text("Load Average");
+
+    chart.append("g")
+    	.attr("class", "x axis")
+    	.attr("transform", "translate("+margin.left+"," + height + ")")
+    	.call(xAxis);
+
+	chart.selectAll(".bar")
+	    .data(data)
+	  .enter().append("rect")
+	  	.attr("fill", function(d){ return "rgb("+d3.round(col(y(d.y)))+","+(255-d3.round(col(y(d.y))))+",0)";})
+	  	.attr("class", "bar")
+		.attr("y", function(d) { return y(d.y); })
+		.attr("x", function(d) { return x(d.x)+margin.left+2; })
+	    .attr("width", barWidth - 3)
+	    .attr("height", function(d) {return height - y(d.y); });
+
+
+</script>
