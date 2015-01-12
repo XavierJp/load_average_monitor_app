@@ -1,41 +1,35 @@
-<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-<style>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+{% load staticfiles %}
+<head>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" type="text/css" href="{% static 'load_charts/style.css' %}" />
+	<title>Average Load Monitoring Web Application</title>
 
-.chart rect {
- 
-}
+	<script src="{% static "js/jquery.js" %}"></script>
+</head>
 
-.chart text {
-  fill: black;
-  font: 10px sans-serif;
-  text-anchor: end;
-}
 
-.axis text {
-  font: 10px sans-serif;
-}
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-</style>
 
 
 <body>
-	<p>Average Load Monitoring Web Application</p>
+	<h1>Average Load Monitoring Web Application</h1>
 	<svg class='chart'></svg>
 	<br>
-	<table border="1" style="width:50%">
+	<table>
 		<tr>
-			<th>Time</th>
-			<th>News</th>
+			<th class="first-column">Time</th>
+			<th>Load Average over past minute</th>
 		</tr>
 		<tr>
-	    	<td>01:04</td>
+	    	<td>{{hour}}</td>
+	    	<td>
+	    	{{ load_avg_last_min }}
+	    	</td>
+	    </tr>
+	    <tr>
+	    	<td>01:06</td>
 	    	<td>
 	    	{{ r }}
 	    	</td>
@@ -43,98 +37,86 @@
 	</table>
 </body>
 
-<script>
 
-	var data = [
-	    {"x":0,"y":1.50,"color":"#FDAE6B"},
-	    {"x":1,"y":1.20,"color":"#FDD0A2"},
-	    {"x":2,"y":1.30,"color":"#FDD0A2"},
-	    {"x":3,"y":1.90,"color":"#FDD0A2"},
-	    {"x":4,"y":1.70,"color":"#FDD0A2"},
-	    {"x":5,"y":1.90,"color":"#FDD0A2"},	    
-	    {"x":6,"y":0.50,"color":"#FDD0A2"},
-	    {"x":7,"y":1.90,"color":"#FDD0A2"},
-	    {"x":8,"y":1.10,"color":"#FDD0A2"},
-	    {"x":9,"y":1.70,"color":"#FDD0A2"},
-	    {"x":10,"y":1.90,"color":"#FDD0A2"},
-	    {"x":11,"y":1.05,"color":"#FDD0A2"},
-	    {"x":12,"y":1.90,"color":"#FDD0A2"},
-	    {"x":13,"y":1.10,"color":"#FDD0A2"},
-	    {"x":14,"y":1.70,"color":"#FDD0A2"},
-	    {"x":15,"y":2.20,"color":"#FDD0A2"},	    
-	    {"x":16,"y":1.90,"color":"#FDD0A2"},
-	    {"x":17,"y":1.05,"color":"#FDD0A2"},
-	    {"x":18,"y":1.90,"color":"#FDD0A2"},
-	    {"x":19,"y":0.50,"color":"#FDD0A2"},
-	    {"x":20,"y":1.90,"color":"#FDD0A2"},
-	    {"x":21,"y":1.10,"color":"#FDD0A2"},
-	    {"x":22,"y":1.70,"color":"#FDD0A2"},
-	    {"x":23,"y":1.90,"color":"#FDD0A2"},
-	    {"x":24,"y":1.05,"color":"#FDD0A2"},
-	    {"x":25,"y":1.90,"color":"#FDD0A2"},
-	    {"x":26,"y":1.10,"color":"#FDD0A2"},
-	    {"x":27,"y":1.70,"color":"#FDD0A2"},
-	    {"x":28,"y":2.20,"color":"#FDD0A2"},	    
-	    {"x":29,"y":1.90,"color":"#FDD0A2"},
-	    {"x":30,"y":1.05,"color":"#FDD0A2"},
-	    {"x":31,"y":1.90,"color":"#FDD0A2"},
-	];
+<script type="text/javascript">
+	getValues();
 
-	var height = 200,
-		width = 400,
-		margin = {top: 20, right: 30, bottom: 30, left: 40};
+	$(document).ready(function(){
+		setInterval("getValues();", 5000);
+	});
+	function getValues() {
+		var json = $.get("/load_charts/test-get/", function (data){ draw_chart(data); });
+	};
 
-	var barWidth = width / data.length;
+	function draw_chart(values) {
 
-	var col = d3.scale.linear()
-    	.domain([0, 200])
-    	.range([height, 0]);
+		d3.select(".chart").selectAll("*").remove();
 
-    var x = d3.scale.linear()
-    	.domain([0, data.length-1])
-    	.range([0, width-barWidth])
+		var data = JSON.parse(values);
 
-    var y = d3.scale.linear()
-    	.domain([0, d3.max(data, function(d) { return d.y; })])
-    	.range([height, 0]);
+		var height = 300,
+			width = 470,
+			margin = {top: 20, right: 30, bottom: 30, left: 40};
 
-	var xAxis = d3.svg.axis()
-    	.scale(x)
-    	.orient("bottom");
+		var barWidth = width / data.length;
 
-    var yAxis = d3.svg.axis()
-    	.scale(y)
-    	.orient("left");
+		var col = d3.scale.linear()
+			.domain([0, 255])
+			.range([height, 0]);
 
-	var chart = d3.select(".chart")
-        .attr("width", width+margin.left+margin.right)
-        .attr("height", height+margin.top+margin.bottom);
+		var x = d3.scale.ordinal()
+		    .domain([0, data.length])
+			.range([0, width]);
 
-    chart.append("g")
-    	.attr("class", "y axis")
-    	.attr("transform", "translate("+margin.left+",0)")
-    	.call(yAxis)
-	   .append("text")
-	    .attr("transform", "rotate(-90)")
-	    .attr("y", -36)
-	    .attr("dy", ".71em")
-	    .style("text-anchor", "end")
-	    .text("Load Average");
+		var y = d3.scale.linear()
+			.domain([d3.min(data, function(d) { return d.value; })*0.95, d3.max(data, function(d) { return d.value; })*1.05])
+			.range([height, 0]);
 
-    chart.append("g")
-    	.attr("class", "x axis")
-    	.attr("transform", "translate("+margin.left+"," + height + ")")
-    	.call(xAxis);
+		var xAxis = d3.svg.axis()
+			.scale(x)
+			.orient("bottom");
 
-	chart.selectAll(".bar")
-	    .data(data)
-	  .enter().append("rect")
-	  	.attr("fill", function(d){ return "rgb("+d3.round(col(y(d.y)))+","+(255-d3.round(col(y(d.y))))+",0)";})
-	  	.attr("class", "bar")
-		.attr("y", function(d) { return y(d.y); })
-		.attr("x", function(d) { return x(d.x)+margin.left+2; })
-	    .attr("width", barWidth - 3)
-	    .attr("height", function(d) {return height - y(d.y); });
+		var yAxis = d3.svg.axis()
+			.scale(y)
+			.orient("left");
 
+		var chart = d3.select(".chart")
+		    .attr("width", width+margin.left+margin.right)
+		    .attr("height", height+margin.top+margin.bottom);
 
+		chart.append("g")
+			.attr("class", "y axis")
+			.attr("transform", "translate("+margin.left+",0)")
+			.call(yAxis)
+		   .append("text")
+		    .attr("transform", "rotate(-90)")
+		    .attr("y", -36)
+		    .attr("dy", ".71em")
+		    .style("text-anchor", "end")
+		    .text("Load Average");
+
+		chart.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate("+margin.left+"," + height + ")")
+			.call(xAxis);
+
+		chart.selectAll(".bar")
+		    .data(data)
+		  .enter().append("rect")
+		  	.attr("fill", function(d){ return "rgb("+d3.round(col(y(d.value)))+10+","+(255-d3.round(col(y(d.value))))+",0)";})
+		  	.attr("class", "bar")
+			.attr("x", function(d, i) { return i*barWidth+margin.left+4; })
+		  	.attr("width", barWidth-4)
+			.attr("y", function(d) { return y(d.value); })
+		    .attr("height", function(d) {return height - y(d.value); })
+
+		chart.selectAll(".label")
+			.data(data)
+		  .enter().append("text")
+		  	.attr("y", function(d) { return y(d.value); })
+			.attr("x", function(d,i) { return i*barWidth+barWidth/2+margin.left-3; })
+			.attr("dy", "-5")
+			.attr("dx", "12")
+		  	.text(function(d) { return d.value; });
+	};
 </script>
