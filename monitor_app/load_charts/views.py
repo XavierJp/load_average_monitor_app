@@ -26,32 +26,34 @@ def charts_get(request):
 		if time_interval > val["date"] or pos > 60:
 			UPTIME_VALUES.pop(pos)
 	UPTIME_VALUES.insert(0,get_uptime_vals())
-	print len(UPTIME_VALUES)
 	return HttpResponse(convert_json(UPTIME_VALUES))
 
 
 def check_alerts(request):
 	global ALERT
-	threshold = float(request.GET.get('threshold', ''))
+	oldest_record = UPTIME_VALUES[0]["date"]
 	time_interval = datetime.datetime.now() - timedelta(minutes=2)
-	sum_avg = 0
-	nb = 0
-	data = []
-	data.append({"alert":-1})
-	for pos, val in enumerate(UPTIME_VALUES):
-		if val["date"] > time_interval:
-			sum_avg += val["value"]
-			nb += 1
-	if nb:
-		avg = sum_avg / nb
-		data.append({"value":avg})
-		if avg > threshold:
-			if not ALERT:
-				ALERT = True
-				data.append({"alert":1})
-		elif ALERT and avg < threshold:
-			ALERT=False
-			data.append({"alert":0})
+	data = {}
+	data["alert"] = -1
+	if time_interval > oldest_record:
+		threshold = float(request.GET.get('threshold', ''))
+		sum_avg = 0
+		nb = 0
+		data["time"] = datetime.datetime.now().strftime("%H:%M:%S")
+		for pos, val in enumerate(UPTIME_VALUES):
+			if val["date"] > time_interval:
+				sum_avg += val["value"]
+				nb += 1
+		if nb:
+			avg = sum_avg / nb
+			data["value"] = avg
+			if avg > threshold:
+				if not ALERT:
+					ALERT = True
+					data["alert"] = 1
+			elif ALERT and avg < threshold:
+				ALERT=False
+				data["alert"] = 0
 	return HttpResponse(json.dumps(data))
 
 def convert_json(values):

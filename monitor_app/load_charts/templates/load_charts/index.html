@@ -27,9 +27,9 @@
 
 
 <script type="text/javascript">
-	getValues();
+	var threshold = 1.0;
 
-	var threshold = 1.50;
+	getValues();	
 
 	// update automation
 	$(document).ready(function(){
@@ -47,10 +47,10 @@
 		var alertJson = JSON.parse(alertMessage);
 
 		if (alertJson.alert == 1){
-			$('#alert-list').append('<li class="temp alert">High load generated an alert - '+alertJson.value+' : <b> load </b>, triggered at xx:xx </li>');
+			$('#alert-list').prepend('<li class="temp alert">High load generated an alert - '+alertJson.value.toFixed(2)+' : <b> load</b>, triggered at '+alertJson.time+'</li>');
 		}
 		else if (alertJson.alert == 0) {
-			$('#alert-list').append('<li class="temp alert-recover">High load generated an alert - load : <b> load </b>, triggered xx:xx</li>');
+			$('#alert-list').prepend('<li class="temp alert-recover">Load is back to normal, at '+alertJson.time+'</li>');
 		}
 	};
 
@@ -65,21 +65,14 @@
 			width = 610,
 			margin = {top: 20, right: 10, bottom: 10, left: 50};
 
-		var barWidth = 5;
+		var barWidth = 7;
 
-		var drag = d3.behavior.drag()
-	        .on("drag", function(d, i) {
-  				var y = d3.event.y;
-	            d3.select(".thresholdText").attr("transform", "translate(0," + y + ")");
-	            d3.select(".thresholdText").text("alert threshold: "+y);
-	            d3.select(".thresholdLine").attr("transform", "translate(0," + y + ")");
-	            });
 
 		var col = d3.scale.linear()
-			.domain([0, 255])
-			.range([height, 0]);
+			.domain([Math.min(threshold, d3.min(data, function(d) { return d.value; })), d3.max(data, function(d) { return d.value; })])
+			.range([0, 255]);
 
-		var minDate = d3.time.minute.offset(new Date(data[data.length - 1].date), -10);
+		var minDate = d3.time.minute.offset(new Date(data[0].date), -10);
 			maxDate = new Date(data[0].date);
 
 		var x = d3.time.scale()
@@ -87,7 +80,7 @@
 			.range([0, width]);
 
 		var y = d3.scale.linear()
-			.domain([Math.min(alert, d3.min(data, function(d) { return d.value; }))*0.95, Math.max(alert, d3.max(data, function(d) { return d.value; }))*1.05])
+			.domain([0, Math.max(alert, d3.max(data, function(d) { return d.value; }))*1.05])
 			.range([height, 0]);
 
 		var xAxis = d3.svg.axis()
@@ -97,6 +90,20 @@
 		var yAxis = d3.svg.axis()
 			.scale(y)
 			.orient("left");
+
+		var drag = d3.behavior.drag()
+			.origin(function() { 
+      			var t = d3.select(this);
+      			return {x: t.attr("x"), y: t.attr("y")};
+      		})
+	        .on("drag", function(d, i) {
+  				var yPos = d3.event.y;
+	            d3.select(".thresholdText").attr("y", yPos)
+	            d3.select(".thresholdText").text("alert threshold: "+y.invert(yPos).toFixed(2));
+	            d3.select(".thresholdLine").attr("y", yPos)
+	            threshold = y.invert(yPos);
+	            });
+
 
 		var chart = d3.select(".chart")
 		    .attr("width", width+margin.left+margin.right)
@@ -121,7 +128,7 @@
 		chart.selectAll(".bar")
 		    .data(data)
 		  .enter().append("rect")
-		  	.attr("fill", function(d){ return "rgb("+d3.round(col(y(d.value)))+10+","+(255-d3.round(col(y(d.value))))+",0)";})
+		  	.attr("fill", function(d){ return "rgb("+d3.round(col(d.value))+10+","+(255-d3.round(col(d.value)))+",0)";})
 		  	.attr("class", "bar")
 			.attr("x", function(d, i) { return x(new Date(d.date))+margin.left - barWidth/2; })
 		  	.attr("width", barWidth)
@@ -133,20 +140,22 @@
 
 		chart.append("rect")
 			.attr("class", "thresholdLine")
-			.attr("y",function() { return height - y(alert); })
+			.attr("y",function() { return y(alert); })
 			.attr("x",function() { return margin.left; })
 			.attr("width", function(d) { return width; })
 			.attr("fill", "#111111")
-			.attr("height", "2");
-
+			.attr("height", "2")
+			.style("cursor", "ns-resize")
+			.call(drag);
 
 		chart.append("text")
 			.attr("class", "thresholdText")
-			.attr("y",function(d) { return height - y(alert); })
+			.attr("y",function(d) { return y(alert); })
 			.attr("dy", "-5")
 			.attr("x",function(d,i) { return margin.left+width; })
-			.attr("fill", "#111111")
-			.text("alert threshold: "+alert)
+			.attr("fill", "#ffffff")
+			.text("alert threshold: "+alert.toFixed(2))
+			.style("color", "#fffffff")
 			.style("cursor", "ns-resize")
 			.call(drag);
 
