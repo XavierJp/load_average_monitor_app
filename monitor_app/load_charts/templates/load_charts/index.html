@@ -29,14 +29,32 @@
 <script type="text/javascript">
 	getValues();
 
+	var threshold = 1.50;
+
+	// update automation
 	$(document).ready(function(){
 		setInterval("getValues();", 10000);
 	});
+
+	// AJAX call
 	function getValues() {
-		$.get("/load_charts/charts-get/", function (data){ drawChart(data, 1.50); });
-		$.get("/load_charts/check-alerts/?threshold="+1.50, function (data){ updateAlert(data) });
+		$.get("/load_charts/charts-get/", function (data){ drawChart(data, threshold); });
+		$.get("/load_charts/check-alerts/?threshold="+threshold, function (data){ updateAlert(data) });
 	};
 
+	// Add alert boxes in right container 
+	function updateAlert(alertMessage) {
+		var alertJson = JSON.parse(alertMessage);
+
+		if (alertJson.alert == 1){
+			$('#alert-list').append('<li class="temp alert">High load generated an alert - '+alertJson.value+' : <b> load </b>, triggered at xx:xx </li>');
+		}
+		else if (alertJson.alert == 0) {
+			$('#alert-list').append('<li class="temp alert-recover">High load generated an alert - load : <b> load </b>, triggered xx:xx</li>');
+		}
+	};
+
+	// D3. Call this function to redraw chart
 	function drawChart(values, alert) {
 
 		d3.select(".chart").selectAll("*").remove();
@@ -47,7 +65,15 @@
 			width = 610,
 			margin = {top: 20, right: 10, bottom: 10, left: 50};
 
-		var barWidth = 10;
+		var barWidth = 5;
+
+		var drag = d3.behavior.drag()
+	        .on("drag", function(d, i) {
+  				var y = d3.event.y;
+	            d3.select(".thresholdText").attr("transform", "translate(0," + y + ")");
+	            d3.select(".thresholdText").text("alert threshold: "+y);
+	            d3.select(".thresholdLine").attr("transform", "translate(0," + y + ")");
+	            });
 
 		var col = d3.scale.linear()
 			.domain([0, 255])
@@ -92,14 +118,13 @@
 			.attr("transform", "translate("+margin.left+"," + height + ")")
 			.call(xAxis);
 
-
 		chart.selectAll(".bar")
 		    .data(data)
 		  .enter().append("rect")
 		  	.attr("fill", function(d){ return "rgb("+d3.round(col(y(d.value)))+10+","+(255-d3.round(col(y(d.value))))+",0)";})
 		  	.attr("class", "bar")
 			.attr("x", function(d, i) { return x(new Date(d.date))+margin.left - barWidth/2; })
-		  	.attr("width", barWidth-4)
+		  	.attr("width", barWidth)
 			.attr("y", function(d) { return y(d.value); })
 		    .attr("height", function(d) {return height - y(d.value); })
 			.on("mouseover", function(d){ 
@@ -107,32 +132,23 @@
 			.on("mouseout", function(){ $(".viewer").remove(); });
 
 		chart.append("rect")
+			.attr("class", "thresholdLine")
 			.attr("y",function() { return height - y(alert); })
 			.attr("x",function() { return margin.left; })
 			.attr("width", function(d) { return width; })
 			.attr("fill", "#111111")
-			.attr("height", "1px");
+			.attr("height", "2");
+
 
 		chart.append("text")
+			.attr("class", "thresholdText")
 			.attr("y",function(d) { return height - y(alert); })
 			.attr("dy", "-5")
 			.attr("x",function(d,i) { return margin.left+width; })
 			.attr("fill", "#111111")
-			.text("alert threshold");
+			.text("alert threshold: "+alert)
+			.style("cursor", "ns-resize")
+			.call(drag);
 
-	};
-
-	function updateAlert(alertMessage) {
-		if (alertMessage = 1){
-			$('#alert-list').append('<li class="temp alert">High load generated an alert - load : <b> load </b>, triggered at xx:xx </li>');
-		}
-		else if (alertMessage = 0) {
-			$('#alert-list').append('<li class="temp alert-recover">High load generated an alert - load : <b> load </b>, triggered xx:xx</li>');
-		}
-	};
-
-	function raiseAlert(value, alertClass){
-		var time = value.date.substr(value.date.length - 8);
-			$('#alert-list').append('<li class="temp '+alertClass+'">High load generated an alert - load : <b>'+value.load+'</b>, triggered at '+value.date+'</li>');
 	};
 </script>
