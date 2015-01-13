@@ -18,7 +18,7 @@ h1{
 	font-size: 20px;
 	font-weight: normal;
 	margin-top: 10px;
-	margin-bottom: 50px;
+	margin-bottom: 15px;
 	padding-bottom: 20px;
 }
 
@@ -26,6 +26,12 @@ h1 .time{
 	float:right;
 	margin-top: 0px;
 }
+
+#welcome-message{
+	font-size: 13px;
+	margin-bottom: 40px;
+}
+
 #display-area{
 	width:100%;
 	float:left;
@@ -79,10 +85,18 @@ ul .alert {
 	background-color: #fff4f4;
 	font-weight: bold;
 }
-ul .alert-recover {
+ul .recover {
+	font-weight: normal;
 	color: #111;
 	border: 1px solid #baeaab;
 	background-color: #f2fff2;
+}
+
+ul .old {
+	font-weight: normal;
+	color: #111;
+	border: 1px solid #e2e2e2;
+	background-color: #f7f7f7;
 }
 
 li {
@@ -103,7 +117,6 @@ li {
 	float: left;
 }
 .chart text {
-  fill: black;
   font: 10px sans-serif;
   text-anchor: end;
 }

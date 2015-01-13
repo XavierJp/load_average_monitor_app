@@ -31,7 +31,7 @@ def charts_get(request):
 
 def check_alerts(request):
 	global ALERT
-	oldest_record = UPTIME_VALUES[0]["date"]
+	oldest_record = UPTIME_VALUES[-1]["date"]
 	time_interval = datetime.datetime.now() - timedelta(minutes=2)
 	data = {}
 	data["alert"] = -1

@@ -12,6 +12,7 @@
 
 <body>
 	<h1>Average Load Monitoring Web Application <p class="time">{{time}}</p></h1>
+	<p id="welcome-message">Modifiy the alert threshold by scrolling it. Click on bars to display load values.</p>
 	<svg class='chart'>
 	</svg>
 	<div id="right-container">
@@ -19,10 +20,10 @@
 			<li>Alert history</li>
 		</ul>
 		<ul id="alert-list">
+		<p class="initialMessage">No alert yet.</p>
 		</ul>
 	</div>
 	<div id="display-area"></div>
-
 </body>
 
 
@@ -34,23 +35,33 @@
 	// update automation
 	$(document).ready(function(){
 		setInterval("getValues();", 10000);
+		setInterval("getAlerts();", 10000);
 	});
 
 	// AJAX call
 	function getValues() {
 		$.get("/load_charts/charts-get/", function (data){ drawChart(data, threshold); });
+	};
+	function getAlerts() {
 		$.get("/load_charts/check-alerts/?threshold="+threshold, function (data){ updateAlert(data) });
 	};
 
 	// Add alert boxes in right container 
 	function updateAlert(alertMessage) {
+
 		var alertJson = JSON.parse(alertMessage);
 
-		if (alertJson.alert == 1){
-			$('#alert-list').prepend('<li class="temp alert">High load generated an alert - '+alertJson.value.toFixed(2)+' : <b> load</b>, triggered at '+alertJson.time+'</li>');
-		}
-		else if (alertJson.alert == 0) {
-			$('#alert-list').prepend('<li class="temp alert-recover">Load is back to normal, at '+alertJson.time+'</li>');
+		if (alertJson.alert !=-1){
+			$(".initialMessage").remove();
+			$(".alert").toggleClass("old", true);
+			$(".alert").toggleClass("alert", false);
+
+			if (alertJson.alert == 1){
+				$('#alert-list').prepend('<li class="alert">High load generated an alert - '+alertJson.value.toFixed(2)+' : <b> load</b>, triggered at '+alertJson.time+'</li>');
+			}
+			else if (alertJson.alert == 0) {
+				$('#alert-list').prepend('<li class="alert recover">Load is back to normal, at '+alertJson.time+'</li>');
+			}
 		}
 	};
 
@@ -130,12 +141,12 @@
 		  .enter().append("rect")
 		  	.attr("fill", function(d){ return "rgb("+d3.round(col(d.value))+10+","+(255-d3.round(col(d.value)))+",0)";})
 		  	.attr("class", "bar")
-			.attr("x", function(d, i) { return x(new Date(d.date))+margin.left - barWidth/2; })
+			.attr("x", function(d, i) { return x(new Date(d.date))+margin.left - barWidth; })
 		  	.attr("width", barWidth)
 			.attr("y", function(d) { return y(d.value); })
 		    .attr("height", function(d) {return height - y(d.value); })
 			.on("mouseover", function(d){ 
-				$("#display-area").append('<p class="viewer"> <b>Time:</b> '+d.date.substr(d.date.length - 8)+'  -    <b>Load average :</b> '+d.value+'</p>'); })
+				$("#display-area").append('<p class="viewer"> <b>Time:</b> '+d.date.substr(d.date.length - 8)+'  -    <b>Load average over past minute :</b> '+d.value+'</p>'); })
 			.on("mouseout", function(){ $(".viewer").remove(); });
 
 		chart.append("rect")
@@ -144,7 +155,7 @@
 			.attr("x",function() { return margin.left; })
 			.attr("width", function(d) { return width; })
 			.attr("fill", "#111111")
-			.attr("height", "2")
+			.attr("height", "1")
 			.style("cursor", "ns-resize")
 			.call(drag);
 
@@ -152,12 +163,12 @@
 			.attr("class", "thresholdText")
 			.attr("y",function(d) { return y(alert); })
 			.attr("dy", "-5")
-			.attr("x",function(d,i) { return margin.left+width; })
-			.attr("fill", "#ffffff")
+			.attr("x",function(d,i) { return margin.left+93; })
 			.text("alert threshold: "+alert.toFixed(2))
-			.style("color", "#fffffff")
+			.attr("fill", "#000")
 			.style("cursor", "ns-resize")
 			.call(drag);
+
 
 	};
 </script>
