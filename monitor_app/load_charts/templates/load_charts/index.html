@@ -33,8 +33,8 @@
 		setInterval("getValues();", 10000);
 	});
 	function getValues() {
-		var json = $.get("/load_charts/charts-get/", function (data){ drawChart(data, 1.50); });
-		//var alert = $.get("/load_charts/check-alerts/", function (data){});
+		$.get("/load_charts/charts-get/", function (data){ drawChart(data, 1.50); });
+		$.get("/load_charts/check-alerts/?threshold="+1.50, function (data){ updateAlert(data) });
 	};
 
 	function drawChart(values, alert) {
@@ -42,8 +42,6 @@
 		d3.select(".chart").selectAll("*").remove();
 
 		var data = JSON.parse(values);
-
-		updateAlert(data, alert);
 
 		var height = 300,
 			width = 610,
@@ -124,25 +122,12 @@
 
 	};
 
-	function updateAlert(values, alert) {
-		$("#alert-list .temp").remove(); 
-		var dateInterval = d3.time.minute.offset(new Date(values[values.length - 1].date), -2);
-		for (var pos in values){
-			var currValue = values[pos];
-			var date = new Date(currValue.date);
-
-			if (date > dateInterval){
-				var load = currValue.value;
-				if (load > alert) {
-					var alertClass = " alert";
-					raiseAlert(currValue, alertClass);
-					break;
-				}
-			}
-			else{
-				var trClass = " alert-recover";
-			}
-			
+	function updateAlert(alertMessage) {
+		if (alertMessage = 1){
+			$('#alert-list').append('<li class="temp alert">High load generated an alert - load : <b> load </b>, triggered at xx:xx </li>');
+		}
+		else if (alertMessage = 0) {
+			$('#alert-list').append('<li class="temp alert-recover">High load generated an alert - load : <b> load </b>, triggered xx:xx</li>');
 		}
 	};
 

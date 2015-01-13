@@ -11,49 +11,50 @@ import ast
 
 UPTIME_VALUES = []
 ALERT = False
-SEUIL = 1.50
 
 # Create your views here.
 def index(request):
+	global UPTIME_VALUES
 	del UPTIME_VALUES[:]
+	ALERT = False
 	time = strftime("%a, %d %b %Y %H:%M:%S", localtime())
 	return render(request, 'load_charts/index.html', locals())
 
 def charts_get(request):
-	data = update_log()
+	global UPTIME_VALUES
+	time_interval = datetime.datetime.now() - timedelta(minutes=10)
+	for pos, val in enumerate(UPTIME_VALUES):
+		val_date = datetime.datetime.strptime(val["date"], "%Y-%m-%d %H:%M:%S")
+		if time_interval > val_date or pos > 60:
+			UPTIME_VALUES.pop(pos)
+	UPTIME_VALUES.insert(0,get_uptime_vals())
+	data = json.dumps(UPTIME_VALUES)
 	return HttpResponse(data)
 
 def check_alerts(request):
+	global ALERT
+	threshold = float(request.GET.get('threshold', ''))
 	time_interval = datetime.datetime.now() - timedelta(minutes=2)
-	data = ''
 	sum_avg = 0
+	data = -1
 	nb = 0
 	for pos, val in enumerate(UPTIME_VALUES):
-		val_date = datetime.datetime.strptime("%Y-%m-%d %H:%M:%S", val["date"])
+		val_date = datetime.datetime.strptime(val["date"], "%Y-%m-%d %H:%M:%S")
 		if val_date > time_interval:
 			sum_avg += val["value"]
 			nb += 1
 	if nb:
 		avg = sum_avg / nb
-		if avg > SEUIL:
+		if avg > threshold:
 			if not ALERT:
 				ALERT = True
-				data = "alert"
-		else:
+				data = 1
 			if ALERT:
-				ALERT=False
-				data = "finalert"
+				data = -1
+		elif ALERT and avg < threshold:
+			ALERT=False
+			data = 0
 	return HttpResponse(data)
-
-
-def update_log():
-	time_interval = datetime.datetime.now() - timedelta(minutes=10)
-	for pos, val in enumerate(UPTIME_VALUES):
-		val_date = datetime.datetime.strptime("%Y-%m-%d %H:%M:%S", val["date"])
-		if time_interval > val_date or pos > 60:
-			UPTIME_VALUES.pop(pos)
-	UPTIME_VALUES.insert(0,get_uptime_vals())
-	return json.dumps(UPTIME_VALUES)
 
 def get_uptime_vals():
 	r = subprocess.check_output(["uptime"])
