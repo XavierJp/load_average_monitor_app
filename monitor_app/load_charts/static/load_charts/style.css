@@ -16,6 +16,7 @@ h1{
 	border-bottom: 1px solid #bbb;
 	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;	
 	font-size: 20px;
+	font-weight: normal;
 	margin-top: 10px;
 	margin-bottom: 50px;
 	padding-bottom: 20px;
@@ -33,7 +34,7 @@ h1 .time{
 .viewer{
 	float:left;
 	margin-left: 50px;
-	font-size: 17px;
+	font-size: 16px;
 	color: #333;
 	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -48,12 +49,13 @@ h1 .time{
 #alert-head{
 	margin-bottom: 0px;
 	width: 100%;
-	border-bottom: 1px solid #888; 
+	border-bottom: 1px solid #bbb; 
 	padding:0;
 	padding-bottom: 2px;
-	font-size: 18px;
+	font-size: 17px;
 }
 #alert-head li {
+	padding-left:4px;
 	margin-top: 0;
 	padding-top: 0;
 }
