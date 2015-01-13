@@ -20,6 +20,9 @@ h1{
 	margin-bottom: 70px;
 	padding-bottom: 20px;
 }
+.viewer{
+	float:left;
+}
 
 table {
 	float: right;
@@ -46,8 +49,7 @@ tr {
 }
 
 th, td {
-	border: 1px solid #bbb; 
-	border-radius: 5px;
+	margin-top: 10px;
 	padding:5px;
 	width:300px;
 	vertical-align: middle;
@@ -55,10 +57,20 @@ th, td {
 	line-height:20px;
 	color: #333;
 	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	border-radius: 5px;
 }
-.alert{
-	color: #780000;
+.alert td{
+	color: #79A888;
+	border: 1px solid #79A888;
+	background-color: #BDFCC9;
 	font-weight: bold;
+}
+.correct td{
+	color: #B22222;
+	border: 1px solid #B22222;
+	background-color: #EEB4B4;
+
+
 }
 
 .first-column {

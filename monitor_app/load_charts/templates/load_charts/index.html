@@ -14,13 +14,13 @@
 
 
 <body>
-	<h1>Average Load Monitoring Web Application</h1>
+	<h1 >Average Load Monitoring Web Application</h1>
+	<div id="display-area"><div>
 	<svg class='chart'></svg>
 	<br>
 	<table id="table-head">
 		<tr>
 			<th class="first-column">Time</th>
-			<th>Average load per minute</th>
 		</tr>
 	</table>
 	<div id="table-container">
@@ -103,16 +103,10 @@
 			.attr("x", function(d, i) { return width - i*barWidth+margin.left-14; })
 		  	.attr("width", barWidth-4)
 			.attr("y", function(d) { return y(d.value); })
+			.on("mouseover", function(d){ $("#display-area").append('<p class="viewer"> Hour: '+d.date+' Load average : '+d.value+'</p>'); })
+			.on("mouseout", function(){ $(".viewer").remove(); })
 		    .attr("height", function(d) {return height - y(d.value); });
 
-		chart.selectAll(".label")
-			.data(data)
-		  .enter().append("text")
-		  	.attr("y", function(d) { return y(d.value); })
-			.attr("x", function(d,i) { return width-i*barWidth-barWidth/2+margin.left+3; })
-			.attr("dy", "-5")
-			.attr("dx", "12")
-		  	.text(function(d) { return d.value; });
 	};
 
 	function updateTable(values) {
@@ -124,11 +118,11 @@
 				var trClass = " alert"
 			}
 			else{
-				var trClass = "";
+				var trClass = " correct";
 			}
 			var hour = currValue.date.substr(currValue.date.length - 8);
 				
-			$('#log-table').append('<tr class="temp '+trClass+'"><td class="first-column">'+hour+'</td><td>'+load+'</td></tr>');
+			$('#log-table').append('<tr class="temp '+trClass+'"><td class="first-column">'+hour+': '+load+'</td></tr>');
 		}
 	}
 </script>

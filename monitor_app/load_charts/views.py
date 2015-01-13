@@ -27,7 +27,6 @@ def update_log():
 		if time_interval > u or pos > 44:
 			UPTIME_VALUES.pop(pos)
 	UPTIME_VALUES.insert(0,get_uptime_vals())
-	print UPTIME_VALUES
 	return json.dumps(UPTIME_VALUES)
 
 def empty_file(path):
