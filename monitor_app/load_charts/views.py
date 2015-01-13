@@ -3,32 +3,43 @@ from django.http import HttpResponse
 import subprocess
 import re
 import json
+from datetime import datetime, timedelta
+from time import time, mktime, strftime, strptime, gmtime
+import time
+import ast
+
+UPTIME_VALUES = []
 
 # Create your views here.
 def index(request):
-	raw_file=open('./load_charts/static/load_charts/uptime_log', 'w')
-	raw_file.write('')
-	raw_file.close
+	UPTIME_VALUES = []
 	return render(request, 'load_charts/index.html', locals())
 
-def test_get(request):
+def charts_get(request):
 	data = update_log()
 	return HttpResponse(data)
 
 
 def update_log():
+	time_interval = datetime.now() - timedelta(minutes=10)
+	for pos, val in enumerate(UPTIME_VALUES):
+		u = datetime.fromtimestamp(mktime(time.strptime(val["date"], "%Y-%m-%d %H:%M:%S")))
+		if time_interval > u or pos > 44:
+			UPTIME_VALUES.pop(pos)
+	UPTIME_VALUES.insert(0,get_uptime_vals())
+	print UPTIME_VALUES
+	return json.dumps(UPTIME_VALUES)
+
+def empty_file(path):
+	open(path, 'w').close()
+
+def get_uptime_vals():
 	r = subprocess.check_output(["uptime"])
-	hour = r[:5]
 	load_averages = re.split("load averages: ", r)
-	load_avg_last_min = re.split(" ",load_averages[1])[0]
+	load_avg_last_min = re.split(" ",load_averages[1])[0].replace(',', '.')
 
-	raw_file=open('./load_charts/static/load_charts/uptime_log', 'a+')
+	new_entry = {}
+	new_entry["date"] = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+	new_entry["value"] = float(load_avg_last_min)
 
-
-	string_to_add = ',{"hour":"'+hour+'","value":'+load_avg_last_min.replace(',', '.')+'}\n'
-
-	raw_file.write(string_to_add)
-	raw_file.seek(0)
-	data = "["+raw_file.read()[1:]+"]"
-	raw_file.close
-	return data
+	return new_entry

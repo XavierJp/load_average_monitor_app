@@ -17,24 +17,16 @@
 	<h1>Average Load Monitoring Web Application</h1>
 	<svg class='chart'></svg>
 	<br>
-	<table>
+	<table id="table-head">
 		<tr>
 			<th class="first-column">Time</th>
-			<th>Load Average over past minute</th>
-		</tr>
-		<tr>
-	    	<td>{{hour}}</td>
-	    	<td>
-	    	{{ load_avg_last_min }}
-	    	</td>
-	    </tr>
-	    <tr>
-	    	<td>01:06</td>
-	    	<td>
-	    	{{ r }}
-	    	</td>
+			<th>Average load per minute</th>
 		</tr>
 	</table>
+	<div id="table-container">
+		<table id="log-table">
+		</table>
+	</div>
 </body>
 
 
@@ -45,20 +37,23 @@
 		setInterval("getValues();", 5000);
 	});
 	function getValues() {
-		var json = $.get("/load_charts/test-get/", function (data){ draw_chart(data); });
+		var json = $.get("/load_charts/charts-get/", function (data){ drawChart(data); });
+
 	};
 
-	function draw_chart(values) {
+	function drawChart(values) {
 
 		d3.select(".chart").selectAll("*").remove();
 
 		var data = JSON.parse(values);
 
-		var height = 300,
-			width = 470,
-			margin = {top: 20, right: 30, bottom: 30, left: 40};
+		updateTable(data);
 
-		var barWidth = width / data.length;
+		var height = 300,
+			width = 570,
+			margin = {top: 20, right: 30, bottom: 30, left: 50};
+
+		var barWidth = 12;
 
 		var col = d3.scale.linear()
 			.domain([0, 255])
@@ -90,7 +85,7 @@
 			.call(yAxis)
 		   .append("text")
 		    .attr("transform", "rotate(-90)")
-		    .attr("y", -36)
+		    .attr("y", -45)
 		    .attr("dy", ".71em")
 		    .style("text-anchor", "end")
 		    .text("Load Average");
@@ -105,18 +100,35 @@
 		  .enter().append("rect")
 		  	.attr("fill", function(d){ return "rgb("+d3.round(col(y(d.value)))+10+","+(255-d3.round(col(y(d.value))))+",0)";})
 		  	.attr("class", "bar")
-			.attr("x", function(d, i) { return i*barWidth+margin.left+4; })
+			.attr("x", function(d, i) { return width - i*barWidth+margin.left-14; })
 		  	.attr("width", barWidth-4)
 			.attr("y", function(d) { return y(d.value); })
-		    .attr("height", function(d) {return height - y(d.value); })
+		    .attr("height", function(d) {return height - y(d.value); });
 
 		chart.selectAll(".label")
 			.data(data)
 		  .enter().append("text")
 		  	.attr("y", function(d) { return y(d.value); })
-			.attr("x", function(d,i) { return i*barWidth+barWidth/2+margin.left-3; })
+			.attr("x", function(d,i) { return width-i*barWidth-barWidth/2+margin.left+3; })
 			.attr("dy", "-5")
 			.attr("dx", "12")
 		  	.text(function(d) { return d.value; });
 	};
+
+	function updateTable(values) {
+		$("#log-table .temp").remove(); 
+		for (var pos in values){
+			var currValue = values[pos];
+			var load = currValue.value;
+			if (load > 1.5){
+				var trClass = " alert"
+			}
+			else{
+				var trClass = "";
+			}
+			var hour = currValue.date.substr(currValue.date.length - 8);
+				
+			$('#log-table').append('<tr class="temp '+trClass+'"><td class="first-column">'+hour+'</td><td>'+load+'</td></tr>');
+		}
+	}
 </script>
