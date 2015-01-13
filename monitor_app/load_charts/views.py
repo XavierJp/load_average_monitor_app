@@ -4,7 +4,7 @@ import subprocess
 import re
 import json
 from datetime import datetime, timedelta
-from time import time, mktime, strftime, strptime, gmtime
+from time import mktime, strftime, strptime, localtime
 import time
 import ast
 
@@ -13,6 +13,7 @@ UPTIME_VALUES = []
 # Create your views here.
 def index(request):
 	UPTIME_VALUES = []
+	time = strftime("%a, %d %b %Y %H:%M:%S", localtime())
 	return render(request, 'load_charts/index.html', locals())
 
 def charts_get(request):
@@ -38,7 +39,7 @@ def get_uptime_vals():
 	load_avg_last_min = re.split(" ",load_averages[1])[0].replace(',', '.')
 
 	new_entry = {}
-	new_entry["date"] = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+	new_entry["date"] = strftime("%Y-%m-%d %H:%M:%S", localtime())
 	new_entry["value"] = float(load_avg_last_min)
 
 	return new_entry

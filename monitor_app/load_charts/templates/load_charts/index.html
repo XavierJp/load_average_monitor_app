@@ -14,19 +14,17 @@
 
 
 <body>
-	<h1 >Average Load Monitoring Web Application</h1>
-	<div id="display-area"><div>
+	<h1>Average Load Monitoring Web Application <p class="time">{{time}}</p></h1>
 	<svg class='chart'></svg>
-	<br>
-	<table id="table-head">
-		<tr>
-			<th class="first-column">Time</th>
-		</tr>
-	</table>
-	<div id="table-container">
-		<table id="log-table">
-		</table>
+	<div id="right-container">
+		<ul id="alert-head">
+			<li>History</li>
+		</ul>
+		<ul id="alert-list">
+		</ul>
 	</div>
+	<div id="display-area"></div>
+
 </body>
 
 
@@ -34,11 +32,10 @@
 	getValues();
 
 	$(document).ready(function(){
-		setInterval("getValues();", 5000);
+		setInterval("getValues();", 10000);
 	});
 	function getValues() {
 		var json = $.get("/load_charts/charts-get/", function (data){ drawChart(data); });
-
 	};
 
 	function drawChart(values) {
@@ -50,8 +47,8 @@
 		updateTable(data);
 
 		var height = 300,
-			width = 570,
-			margin = {top: 20, right: 30, bottom: 30, left: 50};
+			width = 610,
+			margin = {top: 20, right: 10, bottom: 10, left: 50};
 
 		var barWidth = 12;
 
@@ -103,14 +100,15 @@
 			.attr("x", function(d, i) { return width - i*barWidth+margin.left-14; })
 		  	.attr("width", barWidth-4)
 			.attr("y", function(d) { return y(d.value); })
-			.on("mouseover", function(d){ $("#display-area").append('<p class="viewer"> Hour: '+d.date+' Load average : '+d.value+'</p>'); })
+			.on("mouseover", function(d){ 
+				$("#display-area").append('<p class="viewer"> <b>Time:</b> '+d.date.substr(d.date.length - 8)+'      <b>Load average :</b> '+d.value+'</p>'); })
 			.on("mouseout", function(){ $(".viewer").remove(); })
 		    .attr("height", function(d) {return height - y(d.value); });
 
 	};
 
 	function updateTable(values) {
-		$("#log-table .temp").remove(); 
+		$("#alert-list .temp").remove(); 
 		for (var pos in values){
 			var currValue = values[pos];
 			var load = currValue.value;
@@ -118,11 +116,10 @@
 				var trClass = " alert"
 			}
 			else{
-				var trClass = " correct";
+				var trClass = " alert-recover";
 			}
-			var hour = currValue.date.substr(currValue.date.length - 8);
-				
-			$('#log-table').append('<tr class="temp '+trClass+'"><td class="first-column">'+hour+': '+load+'</td></tr>');
+			var time = currValue.date.substr(currValue.date.length - 8);
+			$('#alert-list').append('<li class="temp '+trClass+'">High load generated an alert - load : <b>'+load+'</b>, triggered at '+time+'</li>');
 		}
 	}
 </script>
