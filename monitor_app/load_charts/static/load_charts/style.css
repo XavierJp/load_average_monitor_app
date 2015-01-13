@@ -52,7 +52,7 @@ h1 .time{
 	float:right;
 }
 
-#alert-head{
+.list-head{
 	margin-bottom: 0px;
 	width: 100%;
 	border-bottom: 1px solid #bbb; 
@@ -60,7 +60,7 @@ h1 .time{
 	padding-bottom: 2px;
 	font-size: 17px;
 }
-#alert-head li {
+.list-head li {
 	padding-left:4px;
 	margin-top: 0;
 	padding-top: 0;
@@ -69,9 +69,23 @@ h1 .time{
 #alert-list{
 	width:100%;
 	font-size: 14px;
-	height:270px;
+	height:180px;
 	overflow:scroll;
 	padding-left: 0;
+}
+.initialMessage {
+	padding-left: 4px;
+}
+
+#stats {
+	width:100%;
+	font-size: 14px;
+	height:60px;
+	padding-left: 0;
+}
+
+#stats li {
+	padding-left: 4px;
 }
 ul {
 	margin:0;
@@ -94,9 +108,9 @@ ul .recover {
 
 ul .old {
 	font-weight: normal;
-	color: #111;
-	border: 1px solid #e2e2e2;
-	background-color: #f7f7f7;
+	color: #999;
+	border: 1px solid #cecece;
+	background-color: #fefefe;
 }
 
 li {
@@ -110,7 +124,7 @@ li {
 }
 
 .bar:hover {
- 	fill: rgb(240,100,100);
+ 	fill: #b2dbea;
 }
 
 .chart {
