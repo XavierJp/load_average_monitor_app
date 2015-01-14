@@ -22,16 +22,20 @@ function updateAlert(alertMessage) {
 	var alertJson = JSON.parse(alertMessage);
 
 	if (alertJson.alert !=-1){
-		$(".initialMessage").remove();
-		$(".alert").toggleClass("old", true);
-		$(".alert").toggleClass("alert", false);
+		//console.log($("ul > li:first").className);
+		//if ($("ul > li:first").className == "error" || $("ul > li:first").className == "recover") {
 
-		if (alertJson.alert == 1){
-			$('#alert-list').prepend('<li class="alert">High load generated an alert - '+alertJson.value.toFixed(2)+' : <b> load</b>, triggered at '+alertJson.time+'</li>');
-		}
-		else if (alertJson.alert == 0) {
-			$('#alert-list').prepend('<li class="alert recover">Load is back to normal, at '+alertJson.time+'</li>');
-		}
+			$(".initialMessage").remove();
+			$(".alert").toggleClass("old", true);
+			$(".alert").toggleClass("alert", false);
+
+			if (alertJson.alert == 1){
+				$('#alert-list').prepend('<li class="alert error">High load generated an alert - '+alertJson.value.toFixed(2)+' : <b> load</b>, triggered at '+alertJson.time+'</li>');
+			}
+			else if (alertJson.alert == 0) {
+				$('#alert-list').prepend('<li class="alert recover">Load is back to normal, at '+alertJson.time+'</li>');
+			}
+		//}
 	}
 };
 
@@ -53,11 +57,11 @@ function drawChart(values, alert) {
 		.domain([Math.min(threshold, d3.min(data, function(d) { return d.value; })), d3.max(data, function(d) { return d.value; })])
 		.range([0, 255]);
 
-	var minDate = d3.time.minute.offset(new Date(data[0].date), -10);
-		maxDate = new Date(data[0].date);
+	var	currDate = new Date();
+		minDate = d3.time.minute.offset(currDate, -10);
 
 	var x = d3.time.scale()
-        .domain([minDate, maxDate])
+        .domain([minDate, currDate])
 		.range([0, width]);
 
 	var y = d3.scale.linear()
@@ -83,7 +87,11 @@ function drawChart(values, alert) {
             d3.select(".thresholdText").text("alert threshold: "+y.invert(yPos).toFixed(2));
             d3.select(".thresholdLine").attr("y", yPos)
             threshold = y.invert(yPos);
-            });
+            })
+       	.on("dragend", function(){ 
+       		getAlerts(); 
+       	});
+            
 
 
 	var chart = d3.select(".chart")
