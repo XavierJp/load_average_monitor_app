@@ -14,7 +14,7 @@ class Command(BaseCommand):
     help = 'update uptime log dict'
 
     def handle(self, *args, **options):
-        for t in xrange(9):
+        for t in xrange(6):
             self.update_file()
             time.sleep(10)
 
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         time_interval = datetime.datetime.now() - timedelta(minutes=10)
         for pos, val in enumerate(uptime_values):
             val_date = datetime.datetime.strptime(val["date"], '%Y-%m-%d %H:%M:%S')
-            if time_interval > val_date or pos > 60:
+            if time_interval > val_date:
                 uptime_values.pop(pos)
         uptime_values.insert(0,self.curr_load())
         log_file = open(str(log_path), 'w')

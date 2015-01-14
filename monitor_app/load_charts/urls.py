@@ -2,6 +2,6 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('load_charts.views',
     url(r'^$', 'index'),
-    url(r'^charts-get/$', 'charts_get'),
-    url(r'^check-alerts/$', 'check_alerts'),
+    url(r'^get-charts/$', 'get_charts_values'),
+    url(r'^get-stats/$', 'get_updated_date'),
 )

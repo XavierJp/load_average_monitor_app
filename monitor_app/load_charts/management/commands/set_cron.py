@@ -12,7 +12,7 @@ class Command(BaseCommand):
         return s.replace("(","\(").replace(")","\)").replace(" ","\ ")
 
     def handle(self, *args, **options):
-        command = "echo '* * * * * python "+self.escape_path(SITE_ROOT)+"/manage.py update_data' | crontab"
+        command = "crontab -l | { cat; echo '* * * * * python "+self.escape_path(SITE_ROOT)+"/manage.py update_data';} | crontab"
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         process.wait()
         print "crontab correctly updated"

@@ -22,7 +22,7 @@ h1{
 	padding-bottom: 20px;
 }
 
-h1 .time{
+h1 #top-right-clock{
 	float:right;
 	margin-top: 0px;
 }
@@ -93,7 +93,7 @@ ul {
 	float:right;
 }
 
-ul .alert {
+ul .error {
 	color: #111;
 	border: 1px solid #eaabab;
 	background-color: #fff4f4;

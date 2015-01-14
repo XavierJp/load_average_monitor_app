@@ -13,23 +13,16 @@ import ast
 
 # Create your views here.
 def index(request):
-	global ALERT
-	ALERT = False
-	stats = parse_uptime()
-	uptime = stats["uptime"]
-	users = stats["users"]
-	time = datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S")
-	ip = socket.gethostbyname(socket.gethostname())
 	return render(request, 'load_charts/index.html', locals())
 
-def charts_get(request):
+def get_charts_values(request):
 	log_file = open('./load_charts/static/load_charts/uptime_log', 'r')
 	uptime_values = ast.literal_eval(log_file.read())
 	log_file.close()
 	return HttpResponse(json.dumps(uptime_values))
 
-def check_alerts(request):
-	global ALERT
+def get_updated_date(request):
+
 	log_file = open('./load_charts/static/load_charts/uptime_log', 'r')
 	uptime_values = ast.literal_eval(log_file.read())
 	log_file.close()
@@ -37,7 +30,7 @@ def check_alerts(request):
 	oldest_record = datetime.datetime.strptime(uptime_values[-1]["date"], '%Y-%m-%d %H:%M:%S')
 	time_interval = datetime.datetime.now() - timedelta(minutes=2)
 
-	data = {}
+	data = parse_uptime()
 	data["alert"] = -1
 	if time_interval > oldest_record:
 		threshold = float(request.GET.get('threshold', ''))
@@ -59,7 +52,8 @@ def check_alerts(request):
 	return HttpResponse(json.dumps(data))
 
 def curr_load():
-	load = parse_uptime()["load"]
+	r = subprocess.check_output(["uptime"])
+	load = re.split("load averages: ", r)[0].replace(',', '.')
 	return entry(datetime.datetime.now(), float(load))
 
 def parse_uptime():
@@ -70,6 +64,8 @@ def parse_uptime():
 	parsed_dict["load"] = re.split(" ",load_averages[1])[0].replace(',', '.')
 	parsed_dict["users"] = uptime_values[2]
 	parsed_dict["uptime"] = re.split("up ", uptime_values[0])[1]
+	parsed_dict["clock"] = datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S")
+	parsed_dict["ip"] = socket.gethostbyname(socket.gethostname())
 	return parsed_dict
 
 def entry(date, value):

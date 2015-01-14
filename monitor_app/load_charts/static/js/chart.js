@@ -1,6 +1,7 @@
 var threshold = 1.0;
 
-getValues();	
+getValues();
+getAlerts();	
 
 // update automation
 $(document).ready(function(){
@@ -10,32 +11,43 @@ $(document).ready(function(){
 
 // AJAX call
 function getValues() {
-	$.get("/load_charts/charts-get/", function (data){ drawChart(data, threshold); });
+	$.get("/load_charts/get-charts/", function (data){ drawChart(data, threshold); });
 };
 function getAlerts() {
-	$.get("/load_charts/check-alerts/?threshold="+threshold.toFixed(2), function (data){ updateAlert(data) });
+	$.get("/load_charts/get-stats/?threshold="+threshold.toFixed(2), function (data){ 
+		var alertJson = JSON.parse(data);
+		updateAlert(alertJson); 
+		updateStats(alertJson); 
+	});
+};
+
+function updateStats(stats){
+	$('#stats').html('<li class="stats-temp">IP Address : '+stats.ip+' - Server is up for '+stats.uptime+' - '+stats.users+'</li>');
+
+	$("#top-right-clock").html(stats.clock);
 };
 
 // Add alert boxes in right container 
-function updateAlert(alertMessage) {
+function updateAlert(alertJson) {
 
-	var alertJson = JSON.parse(alertMessage);
-
-	if (alertJson.alert !=-1){
-		//console.log($("ul > li:first").className);
-		//if ($("ul > li:first").className == "error" || $("ul > li:first").className == "recover") {
-
-			$(".initialMessage").remove();
-			$(".alert").toggleClass("old", true);
-			$(".alert").toggleClass("alert", false);
-
-			if (alertJson.alert == 1){
-				$('#alert-list').prepend('<li class="alert error">High load generated an alert - '+alertJson.value.toFixed(2)+' : <b> load</b>, triggered at '+alertJson.time+'</li>');
+	var firstListClass = $('ul#alert-list li:first').attr('class');
+	switch (alertJson.alert){
+		case 1: 
+			if (firstListClass == "recover" || firstListClass == "initialMessage") {
+				$(".initialMessage").remove();
+				$("."+firstListClass).toggleClass("old", true);
+				$("."+firstListClass).toggleClass("recover", false);
+				$('#alert-list').prepend('<li class="error">High load generated an alert - '+alertJson.value.toFixed(2)+' : <b> load</b>, triggered at '+alertJson.time+'</li>');
+				console.log($('ul#alert-list li:first').attr('class'));		
 			}
-			else if (alertJson.alert == 0) {
-				$('#alert-list').prepend('<li class="alert recover">Load is back to normal, at '+alertJson.time+'</li>');
+			break;
+		case 0:
+			if (firstListClass == "error") {
+				$("."+firstListClass).toggleClass("old", true);
+				$("."+firstListClass).toggleClass("error", false);
+				$('#alert-list').prepend('<li class="recover">Load is back to normal, at '+alertJson.time+' - load :'+alertJson.value.toFixed(2)+' - threshold :'+threshold+'</li>');
 			}
-		//}
+			break;
 	}
 };
 
@@ -58,7 +70,8 @@ function drawChart(values, alert) {
 		.range([0, 255]);
 
 	var	currDate = new Date();
-		minDate = d3.time.minute.offset(currDate, -10);
+		minDate = d3.time.second.offset(d3.time.minute.offset(currDate, -10), -10);
+
 
 	var x = d3.time.scale()
         .domain([minDate, currDate])
@@ -119,7 +132,7 @@ function drawChart(values, alert) {
 	  .enter().append("rect")
 	  	.attr("fill", function(d){ return "rgb("+d3.round(col(d.value))+10+","+(255-d3.round(col(d.value)))+",0)";})
 	  	.attr("class", "bar")
-		.attr("x", function(d, i) { return x(new Date(d.date))+margin.left - barWidth; })
+		.attr("x", function(d, i) { return x(new Date(d.date))+margin.left - barWidth/2; })
 	  	.attr("width", barWidth)
 		.attr("y", function(d) { return y(d.value); })
 	    .attr("height", function(d) {return height - y(d.value); })
@@ -131,7 +144,7 @@ function drawChart(values, alert) {
 		.attr("class", "thresholdLine")
 		.attr("y",function() { return y(alert); })
 		.attr("x",function() { return margin.left; })
-		.attr("width", function(d) { return width; })
+		.attr("width", function(d) { return width+barWidth/2; })
 		.attr("fill", "#111111")
 		.attr("height", "1")
 		.style("cursor", "ns-resize")
