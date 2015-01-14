@@ -25,7 +25,7 @@ class Command(BaseCommand):
         log_file.close()
         uptime_values = ast.literal_eval(log)
         time_interval = datetime.datetime.now() - timedelta(minutes=10)
-        for pos, val in enumerate(uptime_values):
+        for pos, val in reversed(list(enumerate(uptime_values))):
             val_date = datetime.datetime.strptime(val["date"], '%Y-%m-%d %H:%M:%S')
             if time_interval > val_date:
                 uptime_values.pop(pos)

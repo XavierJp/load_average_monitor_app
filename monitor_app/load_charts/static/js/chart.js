@@ -38,14 +38,13 @@ function updateAlert(alertJson) {
 				$("."+firstListClass).toggleClass("old", true);
 				$("."+firstListClass).toggleClass("recover", false);
 				$('#alert-list').prepend('<li class="error">High load generated an alert - '+alertJson.value.toFixed(2)+' : <b> load</b>, triggered at '+alertJson.time+'</li>');
-				console.log($('ul#alert-list li:first').attr('class'));		
 			}
 			break;
 		case 0:
 			if (firstListClass == "error") {
 				$("."+firstListClass).toggleClass("old", true);
 				$("."+firstListClass).toggleClass("error", false);
-				$('#alert-list').prepend('<li class="recover">Load is back to normal, at '+alertJson.time+' - load :'+alertJson.value.toFixed(2)+' - threshold :'+threshold+'</li>');
+				$('#alert-list').prepend('<li class="recover">Load is back to normal, at '+alertJson.time+' - load :'+alertJson.value.toFixed(2)+' - threshold :'+threshold.toFixed(2)+'</li>');
 			}
 			break;
 	}
