@@ -49,6 +49,10 @@ function updateAlert(alertJson) {
 			break;
 	}
 };
+//format ECMA and ISO-8601
+function format_date(date) {
+	return new Date(date.split(' ').join('T')+'Z')
+}
 
 // D3. Call this function to redraw chart
 function drawChart(values, alert) {
@@ -68,7 +72,7 @@ function drawChart(values, alert) {
 		.domain([Math.min(threshold, d3.min(data, function(d) { return d.value; })), d3.max(data, function(d) { return d.value; })])
 		.range([0, 255]);
 
-	var	currDate = new Date();
+	var	currDate = format_date(data[0].date);
 		minDate = d3.time.second.offset(d3.time.minute.offset(currDate, -10), -10);
 
 
@@ -131,7 +135,7 @@ function drawChart(values, alert) {
 	  .enter().append("rect")
 	  	.attr("fill", function(d){ return "rgb("+d3.round(col(d.value))+10+","+(255-d3.round(col(d.value)))+",0)";})
 	  	.attr("class", "bar")
-		.attr("x", function(d, i) { return x(new Date(d.date))+margin.left - barWidth/2; })
+		.attr("x", function(d, i) { return x(format_date(d.date))+margin.left - barWidth/2; })
 	  	.attr("width", barWidth)
 		.attr("y", function(d) { return y(d.value); })
 	    .attr("height", function(d) {return height - y(d.value); })
