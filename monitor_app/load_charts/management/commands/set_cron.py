@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 import subprocess
 import os.path
 
-SITE_ROOT = os.path.abspath(os.path.dirname(__name__))
+SITE_ROOT = os.path.abspath(os.path.dirname(__file__+"/../../../../"))
 
 class Command(BaseCommand):
 
