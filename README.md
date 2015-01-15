@@ -8,6 +8,7 @@ IMPORTANT :
 On very first launch, go to the directory where you cloned git repository and type :
 
 cd ./monitonitor_app/
+
 python manage.py set_cron
 
 Verify that crontab has been updated ( crontab -l )
