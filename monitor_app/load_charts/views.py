@@ -53,7 +53,7 @@ def get_updated_date(request):
 
 def curr_load():
 	r = subprocess.check_output(["uptime"])
-	load = re.split("load averages: ", r)[0].replace(',', '.')
+	load = re.split("load average: ", r)[0].replace(',', '.')
 	return entry(datetime.datetime.now(), float(load))
 
 def parse_uptime():
@@ -61,7 +61,7 @@ def parse_uptime():
 	parsed_dict = {}
 	uptime_values = re.split(", ", r)
 	load_averages = re.split("load average: ", uptime_values[3])
-	parsed_dict["load"] = re.split(" ",load_averages[1])[0]
+	parsed_dict["load"] = re.split(", ",load_averages[1])[0]
 	parsed_dict["users"] = uptime_values[2]
 	parsed_dict["uptime"] = re.split("up ", uptime_values[0])[1]
 	parsed_dict["clock"] = datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S")
