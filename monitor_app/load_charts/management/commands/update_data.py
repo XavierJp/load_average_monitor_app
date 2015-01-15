@@ -29,7 +29,7 @@ class Command(BaseCommand):
         log_file.close()
         uptime_values = ast.literal_eval(log)
         # defines a ten minutes interval
-        time_interval = datetime.datetime.now() - timedelta(minutes=10)
+        time_interval = datetime.datetime.utcnow() - timedelta(minutes=10)
         # enumerates previous entries
         for pos, val in reversed(list(enumerate(uptime_values))):
             val_date = datetime.datetime.strptime(val["date"], '%Y-%m-%d %H:%M:%S')
@@ -48,9 +48,17 @@ class Command(BaseCommand):
             returns a dict with current server load and date
         """
         r = subprocess.check_output(["uptime"])
-        load_averages = re.split("load average: ", r)
-        load = re.split(", ",load_averages[1])[0]
-        return self.entry(datetime.datetime.now(), float(load))
+
+        # code for linux
+        # uptime_values = re.split(", ", r)
+        # load_averages = re.split("load average: ", uptime_values[3])
+        # load = re.split(", ",load_averages[1])[0]
+        
+        # code for Unix (Mac)
+        uptime_values = re.split(", ", r)
+        load_averages = re.split("load averages: ", uptime_values[3])
+        load = re.split(" ",load_averages[1])[0].replace(',', '.')
+        return self.entry(datetime.datetime.utcnow(), float(load))
 
     def entry(self, date, value):
         """
