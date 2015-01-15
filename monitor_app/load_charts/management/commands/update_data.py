@@ -36,7 +36,7 @@ class Command(BaseCommand):
 
     def curr_load(self):
         r = subprocess.check_output(["uptime"])
-        load_averages = re.split("load averages: ", r)
+        load_averages = re.split("load average: ", r)
         load = re.split(" ",load_averages[1])[0].replace(',', '.')
         return self.entry(datetime.datetime.now(), float(load))
 
