@@ -38,7 +38,7 @@ def get_updated_date(request):
 	#defines current oldest entry
 	oldest_record = datetime.datetime.strptime(uptime_values[-1]["date"], '%Y-%m-%d %H:%M:%S')
 	#defines a two minutes interval from now
-	time_interval = datetime.datetime.now() - timedelta(minutes=2)
+	time_interval = datetime.datetime.utcnow() - timedelta(minutes=2)
 
 	# creates a dict with stats from uptime statistics (uptime, users ...)
 	data = parse_uptime()
@@ -77,23 +77,22 @@ def parse_uptime():
 	#load average over past minute
 
 	# code for linux
-	# uptime_values = re.split(", ", r)
-	# load_averages = re.split("load average: ", uptime_values[3])
-	# parsed_dict["load"] = re.split(", ",load_averages[1])[0]
+	uptime_values = re.split(", ", r)
+	load_averages = re.split("load average: ", uptime_values[3])
+	parsed_dict["load"] = re.split(", ",load_averages[1])[0]
 	
 	# code for Unix (Mac)
-	uptime_values = re.split(", ", r)
-	load_averages = re.split("load averages: ", uptime_values[3])
-	parsed_dict["load"] = re.split(" ",load_averages[1])[0].replace(',', '.')
+	# uptime_values = re.split(", ", r)
+	# load_averages = re.split("load averages: ", uptime_values[3])
+	# parsed_dict["load"] = re.split(" ",load_averages[1])[0].replace(',', '.')
 
 	parsed_dict["users"] = uptime_values[2]
 	parsed_dict["uptime"] = re.split("up ", uptime_values[0])[1]
 	# US formated datetime to be displayed in top right corner
-	parsed_dict["clock"] = datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S")
+	parsed_dict["date"] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 	# Server IP Adress
 	parsed_dict["ip"] = socket.gethostbyname(socket.gethostname())
 	# Time to be displayed in alert container
-	parsed_dict["time"] = datetime.datetime.now().strftime("%H:%M:%S")
 
 	return parsed_dict
 

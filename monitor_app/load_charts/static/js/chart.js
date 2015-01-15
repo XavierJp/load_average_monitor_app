@@ -28,8 +28,8 @@ function getAlerts() {
 // Update Statistics
 function updateStats(stats){
 	$('#stats').html('<li class="stats-temp">IP Address : '+stats.ip+' - Server is up for '+stats.uptime+' - '+stats.users+'</li>');
-
-	$("#top-right-clock").html(stats.clock);
+	var d = formatDate(stats.date)
+	$("#top-right-clock").html(d.toDateString()+', '+formatTime(d));
 };
 
 // Add alert or recover message. Shadows older messages.
@@ -43,7 +43,7 @@ function updateAlert(alertJson) {
 				$(".initialMessage").remove();
 				$("."+firstListClass).toggleClass("old", true);
 				$("."+firstListClass).toggleClass("recover", false);
-				$('#alert-list').prepend('<li class="error">High load generated an alert - '+alertJson.value.toFixed(2)+', triggered at '+alertJson.time+'</li>');
+				$('#alert-list').prepend('<li class="error">High load generated an alert - '+alertJson.value.toFixed(2)+', triggered at '+formatTime(formatDate(alertJson.date))+'</li>');
 			}
 			break;
 		case 0:
@@ -51,14 +51,19 @@ function updateAlert(alertJson) {
 			if (firstListClass == "error") {
 				$("."+firstListClass).toggleClass("old", true);
 				$("."+firstListClass).toggleClass("error", false);
-				$('#alert-list').prepend('<li class="recover">Load is back to normal, at '+alertJson.time+' - load :'+alertJson.value.toFixed(2)+' - threshold :'+threshold.toFixed(2)+'</li>');
+				$('#alert-list').prepend('<li class="recover">Load is back to normal, at '+formatTime(formatDate(alertJson.date))+' - load :'+alertJson.value.toFixed(2)+' - threshold :'+threshold.toFixed(2)+'</li>');
 			}
 			break;
 	}
 };
 //format ECMA and ISO-8601. Needed to work with mozilla (rhino) and Safari
-function format_date(date) {
+function formatDate(date) {
 	return new Date(date.split(' ').join('T'))
+}
+
+// return truncated string from date with time only
+function formatTime(d){
+	return d.toTimeString().split(' ')[0];
 }
 
 // D3 Chart. Call this function to redraw chart
@@ -81,7 +86,7 @@ function drawChart(values, alert) {
 		.domain([Math.min(threshold, d3.min(data, function(d) { return d.value; })), d3.max(data, function(d) { return d.value; })])
 		.range([0, 255]);
 
-	var	currDate = format_date(data[0].date);
+	var	currDate = formatDate(data[0].date);
 		minDate = d3.time.second.offset(d3.time.minute.offset(currDate, -10), -10);
 
 	// x scale, based on time
@@ -146,12 +151,12 @@ function drawChart(values, alert) {
 	  .enter().append("rect")
 	  	.attr("fill", function(d){ return "rgb("+d3.round(col(d.value))+10+","+(255-d3.round(col(d.value)))+",0)";})
 	  	.attr("class", "bar")
-		.attr("x", function(d, i) { return x(format_date(d.date))+margin.left - barWidth/2; })
+		.attr("x", function(d, i) { return x(formatDate(d.date))+margin.left - barWidth/2; })
 	  	.attr("width", barWidth)
 		.attr("y", function(d) { return y(d.value); })
 	    .attr("height", function(d) {return height - y(d.value); })
 		.on("mouseover", function(d){ 
-			$("#display-area").append('<p class="viewer"> <b>Time:</b> '+d.date.substr(d.date.length - 8)+'  -    <b>Load average over past minute :</b> '+d.value+'</p>'); })
+			$("#display-area").append('<p class="viewer"> <b>Time:</b> '+formatTime(formatDate(d.date))+'  -    <b>Load average over past minute :</b> '+d.value+'</p>'); })
 		.on("mouseout", function(){ $(".viewer").remove(); });
 
 	// alert line. You can drag it

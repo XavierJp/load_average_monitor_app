@@ -6,7 +6,9 @@ SITE_ROOT = os.path.abspath(os.path.dirname(__file__+"/../../../../"))
 
 class Command(BaseCommand):
 
-    help = 'set cron for update_uptime'
+    """
+    	set cron for update_uptime
+    """
 
     def escape_path(self, s):
         return s.replace("(","\(").replace(")","\)").replace(" ","\ ")
