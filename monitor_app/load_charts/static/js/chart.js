@@ -43,7 +43,7 @@ function updateAlert(alertJson) {
 				$(".initialMessage").remove();
 				$("."+firstListClass).toggleClass("old", true);
 				$("."+firstListClass).toggleClass("recover", false);
-				$('#alert-list').prepend('<li class="error">High load generated an alert - '+alertJson.value.toFixed(2)+' : <b> load</b>, triggered at '+alertJson.time+'</li>');
+				$('#alert-list').prepend('<li class="error">High load generated an alert - '+alertJson.value.toFixed(2)+', triggered at '+alertJson.time+'</li>');
 			}
 			break;
 		case 0:
@@ -58,14 +58,16 @@ function updateAlert(alertJson) {
 };
 //format ECMA and ISO-8601. Needed to work with mozilla (rhino) and Safari
 function format_date(date) {
-	return new Date(date.split(' ').join('T')+'Z')
+	return new Date(date.split(' ').join('T'))
 }
 
-// D3. Call this function to redraw chart
+// D3 Chart. Call this function to redraw chart
 function drawChart(values, alert) {
 
+	// Removes old chart
 	d3.select(".chart").selectAll("*").remove();
 
+	// parse values
 	var data = JSON.parse(values);
 
 	var height = 300,
