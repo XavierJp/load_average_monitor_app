@@ -52,14 +52,15 @@ class Command(BaseCommand):
         r = subprocess.check_output(["uptime"])
 
         # code for linux
-        # uptime_values = re.split(", ", r)
-        # load_averages = re.split("load average: ", uptime_values[3])
-        # load = re.split(", ",load_averages[1])[0]
+        uptime_values = re.split(", ", r)
+        load_averages = re.split("load average: ", uptime_values[3])
+        load = re.split(", ",load_averages[1])[0]
         
         # code for Unix (Mac)
-        uptime_values = re.split(", ", r)
-        load_averages = re.split("load averages: ", uptime_values[3])
-        load = re.split(" ",load_averages[1])[0].replace(',', '.')
+        # uptime_values = re.split(", ", r)
+        # load_averages = re.split("load averages: ", uptime_values[3])
+        # load = re.split(" ",load_averages[1])[0].replace(',', '.')
+        
         return self.entry(datetime.datetime.utcnow(), float(load))
 
     def entry(self, date, value):
