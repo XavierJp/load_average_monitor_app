@@ -27,7 +27,7 @@ def get_charts_values(request):
 	log_file.close()
 	return HttpResponse(json.dumps(uptime_values))
 
-def get_updated_date(request):
+def get_updated_stats(request):
 	"""
 		On AJAX call, returns updated data values to populate new chart
 	"""

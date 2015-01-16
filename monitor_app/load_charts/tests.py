@@ -1,29 +1,45 @@
+from django.core.urlresolvers import resolve
 from django.test import TestCase
-import random
-from django.views import get_updated_date
+from load_charts.views import get_updated_stats
+from django.http import HttpRequest
+import ast
+import re
 
 
 class AlertLogicTest(TestCase):
 
-    def setUp(self):
-    	self.threshold = 1.0
-        self.uptime_log_str_alert = self.generate_uptime_log(True)
-        self.uptime_log_str_correct = self.generate_uptime_log(False)
+	def test_get_stats_returns_correct_content(self):
+		""" test content returned by GET on /get-stats """
 
-    def test_alert(self):
-        self.assertEqual(self.threshold, 1.0)
+		response = self.create_request('/load_charts/get-stats/', 1.0)
 
-    def generate_uptime_log(self, bool):
-    	now = datetime.datetime.utcnow()
-    	date = now - timedelta(minutes=10)
-    	list_of_values = []
-        while date < now:
-            entry = {}
-            entry["date"] = date
-            if bool:
-            	entry["value"] = threshold - float(randint(1, 40))/10
-			else:
-            	entry["value"] = threshold + float(randint(1, 40))/100
-        	list_of_values.append(entry)
-        	date = date + timedelta(seconds=10)
-        return str(list_of_values)
+		# test every keys
+		for k in ['load', 'alert', 'value', 'ip', 'users', 'uptime', 'date']:
+			self.assertTrue(k in response.keys()) 
+		
+		# test that alert is either 1 (>> alert level) or 0 (>> no-alert) or -1 (>> not enough value to compute average)
+		self.assertTrue(response["alert"] in [1,0,-1])
+
+		# lower threshold to trigger an alert signal
+		threshold_alert = round(float(response["value"]))
+		response_alert = self.create_request('/load_charts/get-stats/', threshold_alert)
+		self.assertTrue(response_alert["alert"] == 1)
+
+		# raise thrshold to trigger a recover signal
+		threshold_recover = threshold_alert + 1
+		response_recover = self.create_request('/load_charts/get-stats/', threshold_recover)
+		self.assertTrue(response_recover["alert"] == 0)
+
+
+	def test_url_resolves_correct_function(self):
+		""" test that correct view function is called """
+		found = resolve('/load_charts/get-stats/')
+		self.assertEqual(found.func, get_updated_stats)  
+
+	def create_request(self, url, threshold):
+		""" creates request call get_updated_stats and parse answer """
+		request = HttpRequest() 
+		request.path = url
+		request.GET = {'threshold': str(threshold)}
+		cleaned_response = re.split('Content-Type: text/html; charset=utf-8\r\n\r\n', str(get_updated_stats(request)))[-1]
+		return eval(cleaned_response)
