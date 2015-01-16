@@ -27,7 +27,7 @@ function getAlerts() {
 
 // Update Statistics
 function updateStats(stats){
-	$('#stats').html('<li class="stats-temp">IP Address : '+stats.ip+' - Server is up for '+stats.uptime+' - '+stats.users+'</li>');
+	$('#stats').html('<li class="stats-temp">Server is up for '+stats.uptime+' - '+stats.users+'</li>');
 	var d = formatDate(stats.date)
 	$("#top-right-clock").html(d.toDateString()+', '+formatTime(d));
 };
