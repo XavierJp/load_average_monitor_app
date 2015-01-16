@@ -86,7 +86,7 @@ function drawChart(values, alert) {
 		.domain([Math.min(threshold, d3.min(data, function(d) { return d.value; })), d3.max(data, function(d) { return d.value; })])
 		.range([0, 255]);
 
-	var	currDate = formatDate(data[0].date);
+	var	currDate = new Date();
 		minDate = d3.time.second.offset(d3.time.minute.offset(currDate, -10), -10);
 
 	// x scale, based on time
