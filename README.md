@@ -19,7 +19,7 @@ On very first launch, go to monitor_app directory:
 
     $ cd ./monitonitor_app/
     
-Then add to crontab the function that update server load history :
+Then add to crontab the function that updates server load history :
 
     $ python manage.py set_cron
 
