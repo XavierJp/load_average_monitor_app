@@ -1,11 +1,11 @@
 
 # Server load monitor Application
 
-Here is a small web application that monitor server load
+Here is a small web application that monitors server load
 
 ## Main features :
 
-*   Displays informations based on 'uptime' command in shell
+*   Displays information based on 'uptime' command in shell
 *   Displays server uptime, users and server load
 *   Displays server load history over the ten last minutes
 *   Auto-refreshes every ten seconds
